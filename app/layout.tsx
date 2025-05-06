@@ -5,8 +5,8 @@ import { Public_Sans } from 'next/font/google'
 const publicSans = Public_Sans({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Flowsistant',
-  description: 'API for Flow Blochain',
+  title: 'SASA',
+  description: 'SUI AI Security Assistant',
 }
 
 export default function RootLayout({
