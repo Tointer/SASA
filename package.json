@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.3",
+    "@mysten/sui": "^1.29.1",
     "@radix-ui/react-slot": "^1.2.2",
     "@uiw/react-codemirror": "^4.23.12",
     "class-variance-authority": "^0.7.1",
