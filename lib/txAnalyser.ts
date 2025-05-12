@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {getOnchainInfo} from './onchainAnalyser';
+import { ResponseCategory } from './types';
 
 
-export async function txAnalyse(tx : string): Promise<{title: string, answer: string}>{
-    const a = await getOnchainInfo();
-    return {title: "Mock Response", answer: `TX: ${tx}`};
+export async function txAnalyse(tx : string): Promise<{title: string, answer: string, cat: ResponseCategory}>{
+    //const onchainAnalysis = await getOnchainInfo();
+
+    return {title: "Mock Response", answer: `TX: ${tx}`, cat: ResponseCategory.warning};
 }
 
 const testTx = `

@@ -5,6 +5,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import DialogBox from '../DialogBox';
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { ResponseCategory } from "../../../lib/types";
 
 export default function TXAsk() {
   const [resultPresented, setResultPresented] = useState(false)
@@ -12,6 +13,7 @@ export default function TXAsk() {
   const [inputContent, setInputContent] = useState("")
   const [helperMessage, setHelperMessage] = useState("")
   const [helperTitle, setHelperTitle] = useState("")
+  const [responseCategory, setResponseCategory] = useState<ResponseCategory>(ResponseCategory.none)
 
   async function onAsk(){
     setWaitingResult(true);
@@ -29,6 +31,7 @@ export default function TXAsk() {
             setResultPresented(true);
             setWaitingResult(false);
             setHelperTitle(response.title);
+            setResponseCategory(response.cat);
         });
     })
   }
@@ -53,7 +56,7 @@ export default function TXAsk() {
             onChange={onCodeChange}
         />
         {resultPresented ? 
-            <DialogBox title={helperTitle} message={helperMessage}/> 
+            <DialogBox title={helperTitle} message={helperMessage} cat={responseCategory}/> 
             : 
             waitingResult?
                 <Button disabled>
