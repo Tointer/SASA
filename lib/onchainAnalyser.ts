@@ -16,10 +16,17 @@ interface CoinBalanceChangeEvent {
     };
   }
 
-  type Transfer = {
+enum TransferDirection {
+  FromUser = "FromUser",
+  ToUser = "ToUser"
+}
+
+type Transfer = {
     owner: string;
-    coinType: string;
+    tokenSymbol: string;
+    tokenAddress: string;
     amount: bigint;
+    direction: TransferDirection;
 };
 
   function extractTransfers(resp: {
@@ -32,6 +39,20 @@ interface CoinBalanceChangeEvent {
   }): Transfer[] {
     const transfers: Transfer[] = [];
   
+    function parseCoinType(coinType: string): { symbol: string, address: string } {
+      const parts = coinType.split('::');
+      if (parts.length === 3) {
+        return {
+          address: parts[0],
+          symbol: parts[2]
+        };
+      }
+      return {
+        address: coinType,
+        symbol: 'UNKNOWN'
+      };
+    }
+
     // 1. From events (CoinBalanceChange)
     const eventTransfers = (resp.events ?? [])
       .filter((ev: any): ev is {
@@ -43,11 +64,17 @@ interface CoinBalanceChangeEvent {
         typeof ev.parsedJson?.coinType === 'string' &&
         typeof ev.parsedJson?.amount === 'string'
       )
-      .map((ev) => ({
-        owner: ev.parsedJson.owner,
-        coinType: ev.parsedJson.coinType,
-        amount: BigInt(ev.parsedJson.amount),
-      }));
+      .map((ev) => {
+        const { symbol, address } = parseCoinType(ev.parsedJson.coinType);
+        const amount = BigInt(ev.parsedJson.amount);
+        return {
+          owner: ev.parsedJson.owner,
+          tokenSymbol: symbol,
+          tokenAddress: address,
+          amount,
+          direction: amount > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
+        };
+      });
   
     transfers.push(...eventTransfers);
   
@@ -61,15 +88,21 @@ interface CoinBalanceChangeEvent {
           b.owner &&
           (b.owner.AddressOwner || b.owner.ObjectOwner || b.owner.Shared)
       )
-      .map((b) => ({
-        owner:
-          b.owner.AddressOwner ??
-          b.owner.ObjectOwner ??
-          b.owner.Shared ??
-          'unknown',
-        coinType: b.coinType,
-        amount: BigInt(b.amount),
-      }));
+      .map((b) => {
+        const { symbol, address } = parseCoinType(b.coinType);
+        const amount = BigInt(b.amount);
+        return {
+          owner:
+            b.owner.AddressOwner ??
+            b.owner.ObjectOwner ??
+            b.owner.Shared ??
+            'unknown',
+          tokenSymbol: symbol,
+          tokenAddress: address,
+          amount,
+          direction: amount > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
+        };
+      });
   
     transfers.push(...balanceTransfers);
   
@@ -78,18 +111,18 @@ interface CoinBalanceChangeEvent {
   
 
 interface OnchainAnalysis {
-  status: string;
   touchedContracts: {
     id: string;
     isNew: boolean;
   }[];
   balanceChanges: Transfer[];
   riskFlags: string[];
+  rawTransaction: any; // Adding raw transaction field
 }
 
-export async function getOnchainInfo(): Promise<OnchainAnalysis> {
+export async function getOnchainInfo(digest: string): Promise<OnchainAnalysis> {
     console.log("getOnchainInfo called");
-    const digest = '2GAzgwe1yvYxw2CQTEPaCdDHuv8MoXEZPYMCKqk6cxZJ'; // demo
+    //const digest = '2GAzgwe1yvYxw2CQTEPaCdDHuv8MoXEZPYMCKqk6cxZJ'; // demo
 
     const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
     const gql = new SuiGraphQLClient({
@@ -110,10 +143,10 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
     if (!resp.transaction) {
         console.error('No such transaction on chain.');
         return {
-            status: 'Not Found',
             touchedContracts: [],
             balanceChanges: [],
-            riskFlags: ['Transaction not found']
+            riskFlags: ['Transaction not found'],
+            rawTransaction: null
         };
     }
 
@@ -129,7 +162,7 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
     const transfers = extractTransfers(resp as any);
     for (const t of transfers) {
         const dir = t.amount > 0n ? '+' : '';
-        console.log(`  • ${dir}${t.amount}  ${t.coinType}  → ${t.owner}`);
+        console.log(`  • ${dir}${t.amount}  ${t.tokenSymbol}  → ${t.owner}`);
     }
 
     /* package-age check -------------------------------------------------- */
@@ -196,7 +229,7 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
     } else {
         for (const t of transfers) {
             const dir = t.amount > 0n ? '+' : '';
-            console.log(`  • ${dir}${t.amount}  ${t.coinType}  → ${t.owner}`);
+            console.log(`  • ${dir}${t.amount}  ${t.tokenSymbol}  → ${t.owner}`);
         }
     }
 
@@ -215,14 +248,16 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
         riskFlags.push(`Package(s) published < 7 days ago: ${youngPkgs.join(', ')}`);
     }
 
+    const touchedContracts = Array.from(touched).map(id => ({
+        id,
+        isNew: youngPkgs.includes(id)
+    }));
+
     return {
-        status: resp.effects?.status.status || 'Unknown',
-        touchedContracts: Array.from(touched).map(id => ({
-            id,
-            isNew: youngPkgs.includes(id)
-        })),
+        touchedContracts,
         balanceChanges: transfers,
-        riskFlags
+        riskFlags,
+        rawTransaction: resp
     };
 }
 

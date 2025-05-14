@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {getOnchainInfo} from './onchainAnalyser';
 import blacklistChecker from './blacklistChecker';
+import { getTokenPrices } from './priceChecker';
 import { ResponseCategory } from './types';
 
 
 export async function txAnalyse(tx : string): Promise<{title: string, answer: string, cat: ResponseCategory}>{
-  let cat = ResponseCategory.none;
+  let cat = ResponseCategory.regular;
   let answer = "TX";
   let title = "Mock Response"
   
-  //const onchainAnalysis = await getOnchainInfo();
-  const {scams, compromised} = blacklistChecker.checkBlacklist(tx);
+  const onchainAnalysis = await getOnchainInfo(tx);
+  const {scams, compromised} = blacklistChecker.checkBlacklist(onchainAnalysis.rawTransaction);
 
   if(scams.length > 0){
       cat = ResponseCategory.alarm;
@@ -21,6 +22,13 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
       cat = ResponseCategory.alarm
       title = "Compromised contract!"
       answer = `You are interacting with compromised contract ${compromised[0]}, do NOT proceed!`
+  }
+
+  console.log(onchainAnalysis.balanceChanges);
+  const tokenPrices = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.tokenAddress));
+  //log token prices
+  for(const price of tokenPrices.values()){
+    console.log(`${price.address} ${price.value}`);
   }
 
   return {title, answer, cat};
