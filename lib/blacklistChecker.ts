@@ -5,8 +5,6 @@ function checkBlacklist(tx : string): {scams: string[], compromised: string[]}{
         return { scams: [], compromised: [] };
     }
     
-    console.log("Input tx:");
-    
     //regex that matches all addresses in transaction, starting with 0x and spanning 66 characters
     const addressRegex = /0x[a-fA-F0-9]{64}/g;  // Fixed regex to use correct hex characters
     

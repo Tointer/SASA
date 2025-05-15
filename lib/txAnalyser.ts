@@ -25,9 +25,9 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
   }
 
   console.log(onchainAnalysis.balanceChanges);
-  const tokenPrices = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.tokenAddress));
+  const tokenStrings = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.coinType));
   //log token prices
-  for(const price of tokenPrices.values()){
+  for(const price of tokenStrings.values()){
     console.log(`${price.address} ${price.value}`);
   }
 
