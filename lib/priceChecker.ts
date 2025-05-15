@@ -1,37 +1,61 @@
 interface TokenPrice {
     value: number;
-    updateUnixTime: number;
     address: string;
 }
 
-interface BirdeyeResponse {
-    success: boolean;
-    data: {
-        [key: string]: TokenPrice;
+interface CoinGeckoResponse {
+    [key: string]: {
+        usd: number;
     };
 }
 
-export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<string, TokenPrice>> {
-    console.log('getting prices for ' + tokenAddresses);
-    if (!process.env.BIRDEYE_API_KEY) {
-        throw new Error('BIRDEYE_API_KEY environment variable is not set');
+export const stablecoinsTokenStrings = [
+    '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+    '0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068::usdt::USDT',
+    '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', //wormhole USDC
+    '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', //wormhole USDT
+];
+
+export async function getTokenPrices(tokenStrings: string[]): Promise<Map<string, TokenPrice>> {
+    console.log('getting prices for ' + tokenStrings);
+    
+    const priceMap = new Map<string, TokenPrice>();
+
+    // First, handle stablecoins
+    const stablecoins = tokenStrings.filter(token => stablecoinsTokenStrings.includes(token));
+    const otherTokens = tokenStrings.filter(token => !stablecoinsTokenStrings.includes(token));
+
+    // Set price 1.0 for all stablecoins
+    for (const stablecoin of stablecoins) {
+        priceMap.set(stablecoin, {
+            value: 1.0,
+            address: stablecoin
+        });
     }
 
-    // Join addresses with comma and encode
-    const addressList = tokenAddresses.join(',');
-    const encodedAddresses = encodeURIComponent(addressList);
+    // If we only had stablecoins, return early
+    if (otherTokens.length === 0) {
+        return priceMap;
+    }
+
+    // Handle other tokens with CoinGecko
+    if (!process.env.COINGECKO_API_KEY) {
+        throw new Error('COINGECKO_API_KEY environment variable is not set');
+    }
 
     try {
-        console.log('fetching...');
-        console.log("api key: " + process.env.BIRDEYE_API_KEY);
+        // Join addresses with comma and encode
+        const addressList = otherTokens.join(',');
+        const encodedAddresses = encodeURIComponent(addressList);
+
+        console.log('fetching from CoinGecko for non-stablecoin tokens...');
         const response = await fetch(
-            `https://public-api.birdeye.so/defi/multi_price?list_address=${encodedAddresses}`,
+            `https://api.coingecko.com/api/v3/simple/token_price/sui?contract_addresses=${encodedAddresses}&vs_currencies=usd`,
             {
                 method: 'GET',
                 headers: {
-                    'X-API-KEY': process.env.BIRDEYE_API_KEY,
                     'accept': 'application/json',
-                    'x-chain': 'sui'
+                    'x-cg-demo-api-key': process.env.COINGECKO_API_KEY
                 }
             }
         );
@@ -40,16 +64,14 @@ export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<stri
             throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const data = await response.json() as BirdeyeResponse;
+        const data = await response.json() as CoinGeckoResponse;
         
-        if (!data.success) {
-            throw new Error('API request was not successful');
-        }
-
-        // Convert the response data to a Map
-        const priceMap = new Map<string, TokenPrice>();
-        for (const [address, priceData] of Object.entries(data.data)) {
-            priceMap.set(address, priceData);
+        // Add CoinGecko prices to the map
+        for (const [address, priceData] of Object.entries(data)) {
+            priceMap.set(address, {
+                value: priceData.usd,
+                address: address
+            });
         }
 
         return priceMap;
@@ -59,4 +81,4 @@ export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<stri
     }
 }
 
-export default { getTokenPrices };
+export default { getTokenPrices, stablecoinsTokenStrings };
