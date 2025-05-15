@@ -85,11 +85,12 @@ interface OnchainAnalysis {
   }[];
   balanceChanges: Transfer[];
   riskFlags: string[];
+  rawTransaction: any;
 }
 
-export async function getOnchainInfo(): Promise<OnchainAnalysis> {
+export async function getOnchainInfo(digest: string): Promise<OnchainAnalysis> {
     console.log("getOnchainInfo called");
-    const digest = '2GAzgwe1yvYxw2CQTEPaCdDHuv8MoXEZPYMCKqk6cxZJ'; // demo
+    //const digest = '2GAzgwe1yvYxw2CQTEPaCdDHuv8MoXEZPYMCKqk6cxZJ'; // demo
 
     const client = new SuiClient({ url: getFullnodeUrl('mainnet') });
     const gql = new SuiGraphQLClient({
@@ -113,7 +114,8 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
             status: 'Not Found',
             touchedContracts: [],
             balanceChanges: [],
-            riskFlags: ['Transaction not found']
+            riskFlags: ['Transaction not found'],
+            rawTransaction: resp
         };
     }
 
@@ -222,7 +224,8 @@ export async function getOnchainInfo(): Promise<OnchainAnalysis> {
             isNew: youngPkgs.includes(id)
         })),
         balanceChanges: transfers,
-        riskFlags
+        riskFlags,
+        rawTransaction: resp
     };
 }
 
