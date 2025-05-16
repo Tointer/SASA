@@ -9,21 +9,22 @@ interface CoinGeckoResponse {
     };
 }
 
-export const stablecoinsTokenStrings = [
-    '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-    '0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068::usdt::USDT',
-    '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN', //wormhole USDC
-    '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN', //wormhole USDT
+// Store only addresses of stablecoins
+export const stablecoinAddresses = [
+    '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7',
+    '0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068',
+    '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf',
+    '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c',
 ];
 
-export async function getTokenPrices(tokenStrings: string[]): Promise<Map<string, TokenPrice>> {
-    console.log('getting prices for ' + tokenStrings);
+export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<string, TokenPrice>> {
+    console.log('getting prices for ' + tokenAddresses);
     
     const priceMap = new Map<string, TokenPrice>();
 
     // First, handle stablecoins
-    const stablecoins = tokenStrings.filter(token => stablecoinsTokenStrings.includes(token));
-    const otherTokens = tokenStrings.filter(token => !stablecoinsTokenStrings.includes(token));
+    const stablecoins = tokenAddresses.filter(addr => stablecoinAddresses.includes(addr));
+    const otherTokens = tokenAddresses.filter(addr => !stablecoinAddresses.includes(addr));
 
     // Set price 1.0 for all stablecoins
     for (const stablecoin of stablecoins) {
@@ -81,4 +82,4 @@ export async function getTokenPrices(tokenStrings: string[]): Promise<Map<string
     }
 }
 
-export default { getTokenPrices, stablecoinsTokenStrings };
+export default { getTokenPrices, stablecoinAddresses };

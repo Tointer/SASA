@@ -18,9 +18,16 @@ interface CoinBalanceChangeEvent {
 
   type Transfer = {
     owner: string;
-    coinType: string;
+    tokenSymbol: string;
+    tokenAddress: string;
     amount: bigint;
+    direction: TransferDirection;
 };
+
+export enum TransferDirection {
+    FromUser = "FromUser",
+    ToUser = "ToUser"
+}
 
   function extractTransfers(resp: {
     events?: unknown[];
@@ -32,44 +39,50 @@ interface CoinBalanceChangeEvent {
   }): Transfer[] {
     const transfers: Transfer[] = [];
   
+    function parseCoinType(coinType: string): { symbol: string, address: string } {
+        const parts = coinType.split('::');
+        if (parts.length === 3) {
+            return {
+                address: parts[0],
+                symbol: parts[2]
+            };
+        }
+        return {
+            address: coinType,
+            symbol: 'UNKNOWN'
+        };
+    }
+  
     // 1. From events (CoinBalanceChange)
     const eventTransfers = (resp.events ?? [])
-      .filter((ev: any): ev is {
-        type: string;
-        parsedJson: { owner: string; coinType: string; amount: string };
-      } =>
-        ev?.type?.includes('CoinBalanceChange') &&
-        typeof ev.parsedJson?.owner === 'string' &&
-        typeof ev.parsedJson?.coinType === 'string' &&
-        typeof ev.parsedJson?.amount === 'string'
-      )
-      .map((ev) => ({
-        owner: ev.parsedJson.owner,
-        coinType: ev.parsedJson.coinType,
-        amount: BigInt(ev.parsedJson.amount),
-      }));
+      .filter((ev: any): ev is CoinBalanceChangeEvent => ev.type.includes('CoinBalanceChange'))
+      .map(ev => {
+        const parsed = parseCoinType(ev.parsedJson.coinType);
+        return {
+          owner: ev.parsedJson.owner,
+          tokenSymbol: parsed.symbol,
+          tokenAddress: parsed.address,
+          amount: BigInt(ev.parsedJson.amount),
+          direction: BigInt(ev.parsedJson.amount) > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
+        };
+      });
   
     transfers.push(...eventTransfers);
   
     // console.log(JSON.stringify(resp));
     // 2. From balanceChanges array
     const balanceTransfers = (resp.balanceChanges ?? [])
-      .filter(
-        (b) =>
-          typeof b.amount === 'string' &&
-          typeof b.coinType === 'string' &&
-          b.owner &&
-          (b.owner.AddressOwner || b.owner.ObjectOwner || b.owner.Shared)
-      )
-      .map((b) => ({
-        owner:
-          b.owner.AddressOwner ??
-          b.owner.ObjectOwner ??
-          b.owner.Shared ??
-          'unknown',
-        coinType: b.coinType,
-        amount: BigInt(b.amount),
-      }));
+      .map(change => {
+        const owner = change.owner.AddressOwner || change.owner.ObjectOwner || change.owner.Shared || '';
+        const parsed = parseCoinType(change.coinType);
+        return {
+          owner,
+          tokenSymbol: parsed.symbol,
+          tokenAddress: parsed.address,
+          amount: BigInt(change.amount),
+          direction: BigInt(change.amount) > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
+        };
+      });
   
     transfers.push(...balanceTransfers);
   
@@ -131,7 +144,7 @@ export async function getOnchainInfo(digest: string): Promise<OnchainAnalysis> {
     const transfers = extractTransfers(resp as any);
     for (const t of transfers) {
         const dir = t.amount > 0n ? '+' : '';
-        console.log(`  • ${dir}${t.amount}  ${t.coinType}  → ${t.owner}`);
+        console.log(`  • ${dir}${t.amount}  ${t.tokenSymbol}  → ${t.owner}`);
     }
 
     /* package-age check -------------------------------------------------- */
@@ -198,7 +211,7 @@ export async function getOnchainInfo(digest: string): Promise<OnchainAnalysis> {
     } else {
         for (const t of transfers) {
             const dir = t.amount > 0n ? '+' : '';
-            console.log(`  • ${dir}${t.amount}  ${t.coinType}  → ${t.owner}`);
+            console.log(`  • ${dir}${t.amount}  ${t.tokenSymbol}  → ${t.owner}`);
         }
     }
 
