@@ -14,6 +14,9 @@ module.exports = {
       'bg-red-950',
       'bg-teal-800',
       'bg-teal-950',
+      "border-red-950",
+      "border-yellow-950",
+      "border-teal-950"
     ],
     theme: {
       container: {
