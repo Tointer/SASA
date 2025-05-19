@@ -141,7 +141,11 @@ export default function TXAsk() {
                 {TEST_CASES.map((testCase, index) => (
                     <Button
                         key={index}
-                        className="h-auto py-4 px-6 bg-zinc-800 hover:bg-zinc-700 text-white flex flex-col items-center justify-center"
+                        className={`h-auto py-4 px-6 text-white flex flex-col items-center justify-center ${
+                            inputContent === testCase.digest 
+                                ? 'bg-zinc-700 hover:bg-zinc-600 border-1 border-zinc-600' 
+                                : 'bg-zinc-800 hover:bg-zinc-700'
+                        }`}
                         onClick={() => onTestCaseClick(testCase.digest)}
                     >
                         <span className="text-lg font-semibold">{testCase.title}</span>
