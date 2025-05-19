@@ -8,13 +8,14 @@ function DialogBox(props: {
 }) 
 {
 return ( 
-  <div className="flex max-w-screen-sm bg-zinc-900 border rounded-lg shadow  border-gray-700">
-    <div className="relative m-4 w-[100px] h-[100px]">
+  <div className="flex max-w-screen-sm bg-zinc-900 border rounded-lg shadow  border-gray-700 mt-4">
+    <div className="relative m-4 ">
       <Image
           className="object-contain dark:drop-shadow-[0_0_0.3rem_#ffffff70]"
           src={getPictureFromStatus(props.cat)}
           alt="assistant mascot image"
-          fill
+          width={500}
+          height={500}
           priority
       />
     </div>
