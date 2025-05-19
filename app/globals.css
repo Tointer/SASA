@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --backgroundColor: #09090B;
+  --firstColor: #115E59;
+  --secondColor: #A16207;
+  --thirdColor: #991B1B;
+  --fourthColor: #FAFAFA;
+  --dropShadowColor: rgba(0, 0, 0, .7);
 }
 
 @theme inline {
@@ -19,8 +23,25 @@
   }
 }
 
+.blob {
+  margin: auto;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+svg {
+  transform-origin: 50% 50%;
+  animation: move 24s ease-in-out infinite;
+}
+
+@keyframes move {
+  0%   { transform: scale(1)   translate(0, 0) rotate(0); fill: var(--firstColor); filter: drop-shadow( 20px 14px 10px var(--dropShadowColor)); }
+  25%  { transform: scale(0.8) translate(5vw, 10vh) rotate(55deg); fill: var(--secondColor); filter: drop-shadow( 14px 14px 6px var(--dropShadowColor)); }
+  50%  { transform: scale(0.6) translate(15vw, 5vh) rotate(180deg); fill: var(--thirdColor); filter: drop-shadow( -16px -16px 16px var(--dropShadowColor)); }
+  75%  { transform: scale(0.8) translate(5vw, 10h) rotate(55deg); fill: var(--fourthColor); filter: drop-shadow( 14px 14px 6px var(--dropShadowColor)); }
+  100% { transform: scale(1)   translate(0, 0) rotate(0); fill: var(--firstColor); filter: drop-shadow( 20px 14px 10px var(--dropShadowColor)); }
 }

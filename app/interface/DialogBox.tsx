@@ -11,7 +11,7 @@ return (
   <div className="flex max-w-screen-sm bg-zinc-900 border rounded-lg shadow  border-gray-700 mt-4">
     <div className="relative m-4 ">
       <Image
-          className="object-contain dark:drop-shadow-[0_0_0.3rem_#ffffff70]"
+          className="object-contain dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-[100px] max-h-[100px]"
           src={getPictureFromStatus(props.cat)}
           alt="assistant mascot image"
           width={500}

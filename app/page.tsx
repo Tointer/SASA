@@ -1,3 +1,6 @@
+import DialogBox from './interface/DialogBox'
+import { ResponseCategory } from "../lib/types";
+import Blob from "./animatedBlob"
 
 export default function Home() {
   return (
@@ -8,10 +11,23 @@ export default function Home() {
           <p className='mt-4 text-xl'>SASA is making security for both humans and AI agents more reachable</p>
           <p className='mt-2 text-xl'>It will analyse onchain data, scan transaction for any suspicious activity and explain everything in human readable way</p>
         </div>
-        
+        <Blob></Blob>
+        <section >
+          <div className="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
+              <div className="space-y-8">
+                <DialogBox title="NFT transfer" message="You are sending an NFT with ID 55 from your address to the recepient at address 0x1c87fb...a3cb0a" cat={ResponseCategory.regular}/>
+                <DialogBox title="DEX Swap" message="You are swapping 100 USDC for 99.99 USDT, SUI fee is small and slippage is minimal" cat={ResponseCategory.regular}/>
+              </div>
+              <div className="mt-4 md:mt-0">
+                  <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-white">It will explain transaction in plain english</h2>
+                  <p className="mb-6 font-light  md:text-lg text-gray-400">Do you have this anxiety when sending something important to another address, no matter how frequent you do it? SASA created to remove this anxiety by explaining what transactions do in simple terms. And it can do so with any transaction, thanks to GPT-4.1</p>
+              </div>
+          </div>
+        </section>
         <h1 className='text-4xl font-bold m-8'>
           Want to test how it work? Here is <a href="/interface/tx-ask" className='text-blue-600  hover:underline'>web interface demonstration</a>
         </h1>
+
       </div>
     </>
   )
