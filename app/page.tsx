@@ -11,13 +11,13 @@ export default function Home() {
           <p className='mt-4 text-xl'>SASA is making security for both humans and AI agents more reachable</p>
           <p className='mt-2 text-xl'>It will analyse onchain data, scan transaction for any suspicious activity and explain everything in human readable way</p>
         </div>
-        
+
         <Blob></Blob>
 
         <section >
           <div className="gap-8 items-center py-8 px-4 mx-auto max-w-screen-xl xl:gap-16 md:grid md:grid-cols-2 sm:py-16 lg:px-6">
               <div className="space-y-8">
-                <DialogBox title="NFT transfer" message="You are sending an NFT with ID 55 from your address to the recepient at address 0x1c87fb...a3cb0a" cat={ResponseCategory.regular}/>
+                <DialogBox title="NFT transfer" message="You are sending an NFT with ID 55 from your address to the recipient at address 0x1c87fb...a3cb0a" cat={ResponseCategory.regular}/>
                 <DialogBox title="DEX Swap" message="You are swapping 100 USDC for 99.99 USDT, SUI fee is small and slippage is minimal" cat={ResponseCategory.regular}/>
               </div>
               <div className="mt-4 md:mt-0">
