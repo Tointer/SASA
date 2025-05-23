@@ -11,14 +11,6 @@ interface CoinGeckoResponse {
     };
 }
 
-// Store only addresses of stablecoins
-export const stablecoinAddresses = [
-    '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7',
-    '0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068',
-    '0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf',
-    '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c',
-];
-
 export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<string, TokenPrice>> {
     // Deduplicate token addresses
     const uniqueAddresses = [...new Set(tokenAddresses)];
@@ -87,4 +79,4 @@ export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<stri
     }
 }
 
-export default { getTokenPrices, stablecoinAddresses };
+export default { getTokenPrices };
