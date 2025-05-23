@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { type SuiTransactionBlockResponse } from '@mysten/sui/client';
+import { ResponseCategory } from './types';
 
 if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY environment variable is not set');
@@ -18,8 +19,14 @@ const SYSTEM_MESSAGE = `You are a Sui blockchain security assistant. Your role i
 6. Provide recommendations if you notice any suspicious activity
 
 Show info in this format:
-First, fee in sui with usd price
-Second, all tokens transferred with usd price
+In the first line, always start with one of the three code words:
+- "BAD" if the transaction is something not acceptable for the user
+- "WARNING" if the transaction is shady but can be acceptable
+- "REGULAR" if the transaction is regular
+
+Then, in the second line, provide the following information:
+First, fee in sui, usd price if provided
+Second, all tokens transferred with usd price if provided
 
 Then, summary of the transaction in plain english
 
@@ -34,7 +41,7 @@ Be direct and clear in your explanations, and always prioritize user security.`;
 export async function analyzeTransaction(
     rawTransaction: SuiTransactionBlockResponse, 
     transferSummary: string
-): Promise<string> {
+): Promise<{ answer: string, category: ResponseCategory }> {
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-4.1",
@@ -49,7 +56,30 @@ export async function analyzeTransaction(
             max_tokens: 1000
         });
 
-        return response.choices[0].message.content || "No analysis available";
+        const content = response.choices[0].message.content || "No analysis available";
+        
+        // Parse the first word to determine the category
+        const firstWord = content.split(' ')[0].toUpperCase();
+        let category: ResponseCategory;
+        
+        switch (firstWord) {
+            case 'BAD':
+                category = ResponseCategory.alarm;
+                break;
+            case 'WARNING':
+                category = ResponseCategory.warning;
+                break;
+            case 'REGULAR':
+                category = ResponseCategory.regular;
+                break;
+            default:
+                category = ResponseCategory.regular;
+        }
+
+        // Remove the first word and trim the result
+        const answer = content.split(' ').slice(1).join(' ').trim();
+
+        return { answer, category };
     } catch (error) {
         console.error('Error in AI analysis:', error);
         throw new Error('Failed to analyze transaction with AI');

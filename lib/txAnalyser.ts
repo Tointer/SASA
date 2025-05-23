@@ -53,7 +53,8 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
     // Always get AI analysis
     try {
       const aiAnalysis = await analyzeTransaction(onchainAnalysis.rawTransaction, transferSummary);
-      answer = `${aiAnalysis}`;
+      answer = aiAnalysis.answer;
+      cat = aiAnalysis.category;
     } catch (error) {
       console.error('Failed to get AI analysis:', error);
       answer = transferSummary; // Fallback to just the transfer summary if AI fails
