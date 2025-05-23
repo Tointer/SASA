@@ -34,7 +34,7 @@ body {
 }
 
 
-.blob-animation {
+.blob {
   transform-origin: 50% 50%;
   animation: move 24s ease-in-out infinite;
 }
