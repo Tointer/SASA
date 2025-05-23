@@ -30,6 +30,8 @@ Second, all tokens transferred with usd price if provided
 
 Then, summary of the transaction in plain english
 
+Then, write "***" and write the same summary but in very short form, like 1-2 sentences, so it can be used in small UI elements.
+
 Focus on:
 - Token transfers and their USD values
 - Contract interactions
@@ -41,7 +43,7 @@ Be direct and clear in your explanations, and always prioritize user security.`;
 export async function analyzeTransaction(
     rawTransaction: SuiTransactionBlockResponse, 
     transferSummary: string
-): Promise<{ answer: string, category: ResponseCategory }> {
+): Promise<{ answer: string, category: ResponseCategory, shortSummary: string }> {
     try {
         const response = await openai.chat.completions.create({
             model: "gpt-4.1",
@@ -77,9 +79,16 @@ export async function analyzeTransaction(
         }
 
         // Remove the first word and trim the result
-        const answer = content.split(' ').slice(1).join(' ').trim();
+        const fullAnswer = content.split(' ').slice(1).join(' ').trim();
+        
+        // Split by *** and get both parts
+        const [answer, shortSummary] = fullAnswer.split('***').map(part => part.trim());
 
-        return { answer, category };
+        return { 
+            answer, 
+            category,
+            shortSummary: shortSummary || answer // Fallback to full answer if no short summary
+        };
     } catch (error) {
         console.error('Error in AI analysis:', error);
         throw new Error('Failed to analyze transaction with AI');

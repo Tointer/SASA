@@ -50,7 +50,7 @@ export default function TXAsk() {
             setResultPresented(true);
             setWaitingResult(false);
             setHelperTitle(response.title);
-            setResponseCategory(response.cat);
+            setResponseCategory(response.category);
         });
     })
   }

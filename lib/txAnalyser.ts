@@ -7,10 +7,16 @@ import { analyzeTransaction } from './aiAnalyser';
 import { getTokenDecimals } from './tokenConfig';
 
 
-export async function txAnalyse(tx : string): Promise<{title: string, answer: string, cat: ResponseCategory}>{
-  let cat = ResponseCategory.regular;
+export async function txAnalyse(tx : string): Promise<{
+    title: string, 
+    answer: string, 
+    shortSummary: string,
+    category: ResponseCategory
+}> {
+  let category = ResponseCategory.regular;
   let answer = "TX";
-  let title = "Transaction Analysis"
+  let title = "Transaction Analysis";
+  let shortSummary = "";
   
   const onchainAnalysis = await getOnchainInfo(tx);
   const {scams, compromised} = blacklistChecker.checkBlacklist(onchainAnalysis.rawTransaction);
@@ -40,28 +46,32 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
     : "No token transfers in this transaction.";
 
   if(scams.length > 0){
-    cat = ResponseCategory.alarm;
+    category = ResponseCategory.alarm;
     title = "Scam alert!"
     answer = `Your transaction is interacting with scam address ${scams[0]}, do NOT proceed!`;
+    shortSummary = answer;
   }
   else if(compromised.length > 0){
-    cat = ResponseCategory.alarm
+    category = ResponseCategory.alarm
     title = "Compromised contract!"
     answer = `You are interacting with compromised contract ${compromised[0]}, do NOT proceed!`
+    shortSummary = answer;
   }
   else {
     // Always get AI analysis
     try {
       const aiAnalysis = await analyzeTransaction(onchainAnalysis.rawTransaction, transferSummary);
       answer = aiAnalysis.answer;
-      cat = aiAnalysis.category;
+      category = aiAnalysis.category;
+      shortSummary = aiAnalysis.shortSummary;
     } catch (error) {
       console.error('Failed to get AI analysis:', error);
       answer = transferSummary; // Fallback to just the transfer summary if AI fails
+      shortSummary = answer;
     }
   }
 
-  return {title, answer, cat};
+  return {title, answer, shortSummary, category};
 }
 
 export default {txAnalyse};
