@@ -20,6 +20,7 @@ interface CoinBalanceChangeEvent {
     owner: string;
     tokenSymbol: string;
     tokenAddress: string;
+    tokenAddressRaw: string;
     amount: bigint;
     direction: TransferDirection;
 };
@@ -62,6 +63,7 @@ export enum TransferDirection {
           owner: ev.parsedJson.owner,
           tokenSymbol: parsed.symbol,
           tokenAddress: parsed.address,
+          tokenAddressRaw: ev.parsedJson.coinType,
           amount: BigInt(ev.parsedJson.amount),
           direction: BigInt(ev.parsedJson.amount) > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
         };
@@ -79,6 +81,7 @@ export enum TransferDirection {
           owner,
           tokenSymbol: parsed.symbol,
           tokenAddress: parsed.address,
+          tokenAddressRaw: change.coinType,
           amount: BigInt(change.amount),
           direction: BigInt(change.amount) > 0n ? TransferDirection.ToUser : TransferDirection.FromUser
         };

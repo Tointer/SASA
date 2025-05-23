@@ -16,7 +16,7 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
   const {scams, compromised} = blacklistChecker.checkBlacklist(onchainAnalysis.rawTransaction);
 
   // Prepare transfer summary regardless of other conditions
-  const tokenPrices = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.tokenAddress));
+  const tokenPrices = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.tokenAddressRaw));
   const transferMessages = onchainAnalysis.balanceChanges.map(transfer => {
     const decimals = getTokenDecimals(transfer.tokenAddress);
     const absAmount = transfer.amount < 0n ? -transfer.amount : transfer.amount;
