@@ -19,7 +19,7 @@ export async function txAnalyse(tx : string): Promise<{
     return {
       title: testCase.response.title,
       answer: testCase.response.answer,
-      shortSummary: testCase.response.title,
+      shortSummary: testCase.response.shortSummary,
       category: testCase.response.cat
     };
   }

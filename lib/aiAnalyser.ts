@@ -38,6 +38,7 @@ Focus on:
 - Known security patterns or red flags
 - Unusual token movements or contract behaviors
 
+Use "you" to refer to the user. Tell about transaction in future tense.If transaction involves lending protocols, don't mention lending tokens operations like wrappedSUI, just mention what operation is about and what user supplying or withdrawing.
 Be direct and clear in your explanations, and always prioritize user security.`;
 
 export async function analyzeTransaction(
