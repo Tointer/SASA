@@ -13,28 +13,13 @@ export default function TXAsk() {
   const [waitingResult, setWaitingResult] = useState(false)
   const [inputContent, setInputContent] = useState("")
   const [helperMessage, setHelperMessage] = useState("")
+  const [shortSummary, setShortSummary] = useState("")
   const [helperTitle, setHelperTitle] = useState("")
   const [responseCategory, setResponseCategory] = useState<ResponseCategory>(ResponseCategory.none)
 
   async function onAsk(){
     setWaitingResult(true);
     
-    // Check if this is a test transaction
-    const testCase = TEST_CASES.find(tc => tc.digest === inputContent);
-    
-    if (testCase) {
-        // Add delay so that instant response will not feel weird
-        await new Promise(resolve => setTimeout(resolve, 700));
-        
-        // Use cached response to not waste tokens, and to give an example of the response even when RPCs is down
-        setHelperMessage(testCase.response.answer);
-        setHelperTitle(testCase.response.title);
-        setResponseCategory(testCase.response.cat);
-        setResultPresented(true);
-        setWaitingResult(false);
-        return;
-    }
-
     // If not a test case, proceed with API call
     fetch('/api/tx-ask', {
         method: 'POST',
@@ -51,6 +36,7 @@ export default function TXAsk() {
             setWaitingResult(false);
             setHelperTitle(response.title);
             setResponseCategory(response.category);
+            setShortSummary(response.shortSummary);
         });
     })
   }
@@ -79,8 +65,11 @@ export default function TXAsk() {
                 extensions={[javascript({ jsx: true })]}
                 onChange={onCodeChange}
             />
-            {resultPresented ? 
-                <DialogBox title={helperTitle} message={helperMessage} cat={responseCategory}/> 
+            {resultPresented ?
+                <div>
+                    <DialogBox title={helperTitle} message={shortSummary} cat={responseCategory} showMascot={true}/> 
+                    <DialogBox title="Detailed view" message={helperMessage} cat={responseCategory} showMascot={false}/> 
+                </div>
                 : 
                 waitingResult?
                     <Button disabled>
