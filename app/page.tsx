@@ -23,7 +23,7 @@ export default function Home() {
       </div>
 
       {/* Blob Section */}
-      <div className="py-8 flex justify-center">
+      <div className=" flex justify-center">
         <div className="w-full max-w-2xl">
           <Blob />
         </div>

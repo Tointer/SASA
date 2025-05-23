@@ -8,7 +8,7 @@ export default function NavBar() {
 
   
   return (
-  <nav className="border-gray-200 bg-teal-800 dark:bg-gray-800 dark:border-gray-700">
+  <nav className="border-gray-200 dark:bg-gray-800 dark:border-gray-700">
     <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
       <a href="#" className="flex items-center">
           <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">SASA</span>
@@ -20,9 +20,6 @@ export default function NavBar() {
           </li>
           <li>
             <a href="/interface/tx-ask" className="block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">TX analyser</a>
-          </li>
-          <li>
-            <a href="/interface/ama" className="block py-2 pl-3 pr-4 text-white rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Ask anything</a>
           </li>
         </ul>
       </div>

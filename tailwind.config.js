@@ -12,7 +12,6 @@ module.exports = {
       'bg-yellow-950',
       'bg-red-800',
       'bg-red-950',
-      'bg-teal-800',
       'bg-teal-950',
       "border-red-950",
       "border-yellow-950",
