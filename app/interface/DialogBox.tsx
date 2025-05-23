@@ -4,22 +4,25 @@ import Image from 'next/image';
 function DialogBox(props: {
   title: string
   message: string, 
-  cat: ResponseCategory
+  cat: ResponseCategory,
+  showMascot?: boolean
 }) 
 {
 return ( 
-  <div className="flex max-w-screen-sm bg-zinc-900 border rounded-lg shadow  border-gray-700 mt-4">
-    <div className="relative m-4 ">
-      <Image
+  <div className="flex max-w-screen-sm bg-zinc-900 border rounded-lg shadow border-gray-700 mt-4">
+    {props.showMascot !== false && (
+      <div className="relative m-4">
+        <Image
           className="object-contain dark:drop-shadow-[0_0_0.3rem_#ffffff70] max-w-[100px] max-h-[100px]"
           src={getPictureFromStatus(props.cat)}
           alt="assistant mascot image"
           width={500}
           height={500}
           priority
-      />
-    </div>
-    <div className={`block p-3 text-left bg-${getBgCol(props.cat)} border rounded-lg shadow  border-${getBorderCol(props.cat)}`}>
+        />
+      </div>
+    )}
+    <div className={`block w-full p-3 text-left bg-${getBgCol(props.cat)} border rounded-lg shadow border-${getBorderCol(props.cat)}`}>
       <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-200">{props.title}</h5>
       <p className="font-normal text-gray-200 whitespace-pre-line">{props.message}</p>
     </div>
