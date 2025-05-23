@@ -1,3 +1,5 @@
+import { isStablecoin } from './tokenConfig';
+
 interface TokenPrice {
     value: number;
     address: string;
@@ -23,8 +25,8 @@ export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<stri
     const priceMap = new Map<string, TokenPrice>();
 
     // First, handle stablecoins
-    const stablecoins = tokenAddresses.filter(addr => stablecoinAddresses.includes(addr));
-    const otherTokens = tokenAddresses.filter(addr => !stablecoinAddresses.includes(addr));
+    const stablecoins = tokenAddresses.filter(addr => isStablecoin(addr));
+    const otherTokens = tokenAddresses.filter(addr => !isStablecoin(addr));
 
     // Set price 1.0 for all stablecoins
     for (const stablecoin of stablecoins) {
@@ -73,6 +75,7 @@ export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<stri
                 value: priceData.usd,
                 address: address
             });
+            console.log('price for ' + address + ' is ' + priceData.usd);
         }
 
         return priceMap;

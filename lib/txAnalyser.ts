@@ -4,6 +4,7 @@ import blacklistChecker from './blacklistChecker';
 import { getTokenPrices } from './priceChecker';
 import { ResponseCategory } from './types';
 import { analyzeTransaction } from './aiAnalyser';
+import { getTokenDecimals } from './tokenConfig';
 
 
 export async function txAnalyse(tx : string): Promise<{title: string, answer: string, cat: ResponseCategory}>{
@@ -17,13 +18,21 @@ export async function txAnalyse(tx : string): Promise<{title: string, answer: st
   // Prepare transfer summary regardless of other conditions
   const tokenPrices = await getTokenPrices(onchainAnalysis.balanceChanges.map(x => x.tokenAddress));
   const transferMessages = onchainAnalysis.balanceChanges.map(transfer => {
-    const decimals = 9;
+    const decimals = getTokenDecimals(transfer.tokenAddress);
     const absAmount = transfer.amount < 0n ? -transfer.amount : transfer.amount;
     const formattedAmount = (Number(absAmount) / Math.pow(10, decimals)).toFixed(6);
+
+    const priceExists = tokenPrices.has(transfer.tokenAddress);
     const price = tokenPrices.get(transfer.tokenAddress)?.value || 0;
     const usdAmount = (Number(absAmount) / Math.pow(10, decimals)) * price;
-    
-    return `User is ${transfer.direction === TransferDirection.FromUser ? "transferring" : "receiving"} ${formattedAmount} ${transfer.tokenSymbol} (worth $${usdAmount.toFixed(2)})`;
+
+    let response = `User is ${transfer.direction === TransferDirection.FromUser ? "transferring" : "receiving"} ${formattedAmount} ${transfer.tokenSymbol}`;
+
+    if(priceExists){
+      response += ` (worth $${usdAmount.toFixed(2)})`;
+    }
+
+    return response;
   });
 
   const transferSummary = transferMessages.length > 0 
