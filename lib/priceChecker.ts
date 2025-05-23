@@ -20,13 +20,15 @@ export const stablecoinAddresses = [
 ];
 
 export async function getTokenPrices(tokenAddresses: string[]): Promise<Map<string, TokenPrice>> {
-    console.log('getting prices for ' + tokenAddresses);
+    // Deduplicate token addresses
+    const uniqueAddresses = [...new Set(tokenAddresses)];
+    console.log('getting prices for ' + uniqueAddresses);
     
     const priceMap = new Map<string, TokenPrice>();
 
     // First, handle stablecoins
-    const stablecoins = tokenAddresses.filter(addr => isStablecoin(addr));
-    const otherTokens = tokenAddresses.filter(addr => !isStablecoin(addr));
+    const stablecoins = uniqueAddresses.filter(addr => isStablecoin(addr));
+    const otherTokens = uniqueAddresses.filter(addr => !isStablecoin(addr));
 
     // Set price 1.0 for all stablecoins
     for (const stablecoin of stablecoins) {
